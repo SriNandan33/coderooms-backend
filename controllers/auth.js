@@ -6,9 +6,24 @@ const authRouter = require('express').Router()
 
 authRouter.post('/register', async (request, response) => {
   const body = request.body
+
+  var user = await User.exists({ email: body.email })
+  if (user) {
+    return response.status(400).send({
+      error: 'email is already used.',
+    })
+  }
+
+  var user = await User.exists({ username: body.username })
+  if (user) {
+    return response.status(400).send({
+      error: 'Username is already taken.',
+    })
+  }
+
   const saltRounds = 10 // TODO: need to move it to config
   let passwordHash = await bcrypt.hash(body.password, saltRounds)
-  const user = new User({
+  var user = new User({
     email: body.email,
     password: passwordHash,
     name: body.name,
@@ -40,7 +55,7 @@ authRouter.post('/login', async (request, response) => {
     user === null ? false : await bcrypt.compare(body.password, user.password)
 
   if (!(user && passwordCorrect)) {
-    return response.status(401).json({
+    return response.status(400).json({
       error: 'invalid username or password',
     })
   }
