@@ -40,10 +40,8 @@ authRouter.post('/register', async (request, response) => {
   const token = jwt.sign(userForToken, process.env.SECRET)
 
   response.status(200).send({
-    username: user.username,
-    email: user.email,
-    name: user.name,
-    token: token,
+    ...userForToken,
+    ...{ name: user.name, token: token },
   })
 })
 
@@ -69,10 +67,8 @@ authRouter.post('/login', async (request, response) => {
   const token = jwt.sign(userForToken, process.env.SECRET)
 
   response.status(200).send({
-    username: user.username,
-    email: user.email,
-    name: user.name,
-    token: token,
+    ...userForToken,
+    ...{ token, name: user.name },
   })
 })
 
