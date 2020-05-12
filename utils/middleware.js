@@ -1,4 +1,7 @@
+const jwt = require('jsonwebtoken')
+
 const logger = require('./logger')
+const User = require('../models/user')
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method)
@@ -24,8 +27,26 @@ const errorHandler = (error, request, response, next) => {
   next(error)
 }
 
+const validateJWT = async (request, response, next) => {
+  const authHeader = request.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1]
+  if (!token) return response.status(401).send('Token is missing')
+
+  try {
+    var decoded = jwt.verify(token, process.env.SECRET)
+  } catch (err) {
+    return response.status(401).send(err)
+  }
+  const user = await User.findOne({ email: decoded.email })
+  if (!user) return response.status(404).send('User not found')
+
+  request.user = user
+  next()
+}
+
 module.exports = {
   requestLogger,
   unknownEndpoint,
   errorHandler,
+  validateJWT,
 }
