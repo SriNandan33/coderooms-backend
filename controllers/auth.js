@@ -6,15 +6,15 @@ const authRouter = require('express').Router()
 
 authRouter.post('/register', async (request, response) => {
   const body = request.body
-
-  var user = await User.exists({ email: body.email })
+  let user
+  user = await User.exists({ email: body.email })
   if (user) {
     return response.status(400).send({
       error: 'email is already used.',
     })
   }
 
-  var user = await User.exists({ username: body.username })
+  user = await User.exists({ username: body.username })
   if (user) {
     return response.status(400).send({
       error: 'Username is already taken.',
@@ -23,7 +23,7 @@ authRouter.post('/register', async (request, response) => {
 
   const saltRounds = 10 // TODO: need to move it to config
   let passwordHash = await bcrypt.hash(body.password, saltRounds)
-  var user = new User({
+  user = new User({
     email: body.email,
     password: passwordHash,
     name: body.name,
