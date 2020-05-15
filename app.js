@@ -2,11 +2,11 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const mongoose = require('mongoose')
-const logger = require('./utils/logger')
 const config = require('./utils/config')
 const middleware = require('./utils/middleware')
 const authRouter = require('./controllers/auth')
 const dashboardRouter = require('./controllers/dashboard')
+const roomRouter = require('./controllers/room')
 
 mongoose.connect(config.MONGODB_URI, {
   useNewUrlParser: true,
@@ -22,6 +22,7 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use('/api/auth', authRouter)
 app.use('/api/dashboard', dashboardRouter)
+app.use('/api/rooms', roomRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
