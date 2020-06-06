@@ -7,6 +7,7 @@ const middleware = require('./utils/middleware')
 const authRouter = require('./controllers/auth')
 const dashboardRouter = require('./controllers/dashboard')
 const roomRouter = require('./controllers/room')
+const codeRouter = require('./controllers/code')
 
 mongoose.connect(config.MONGODB_URI, {
   useNewUrlParser: true,
@@ -23,6 +24,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/api/auth', authRouter)
 app.use('/api/dashboard', dashboardRouter)
 app.use('/api/rooms', roomRouter)
+app.use('/api/code', codeRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
