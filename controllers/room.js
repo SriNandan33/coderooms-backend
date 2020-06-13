@@ -1,8 +1,11 @@
 const roomRouter = require('express').Router()
+const Types = require('mongoose').Types
 const Room = require('../models/room')
+const User = require('../models/user')
 const { validateJWT } = require('../utils/middleware')
 const { validate } = require('express-validation')
 const { roomValidator } = require('../validators/room')
+const { addGuestValidator } = require('../validators/guests')
 
 roomRouter.get('/', validateJWT, async (request, response) => {
   const rooms = await Room.find({ owner: request.user._id }).sort({
@@ -54,6 +57,31 @@ roomRouter.put(
       new: true,
     })
     response.send({ room: updatedRoom })
+  }
+)
+
+roomRouter.post(
+  '/:roomId/guests',
+  validateJWT,
+  validate(addGuestValidator, { keyByField: true }),
+  async (request, response) => {
+    const { roomId } = request.params
+    const payload = request.body
+    const guest = await User.findOne({ email: payload.email })
+    if (!guest) {
+      response.status(404).send({ error: 'User not found!' })
+    }
+
+    try {
+      const room = await Room.findByIdAndUpdate(
+        roomId,
+        { $addToSet: { guests: Types.ObjectId(guest._id) } },
+        { new: true, useFindAndModify: false }
+      ).populate('guests')
+      response.send({ room: room })
+    } catch (err) {
+      response.status(500).send({ error: `Can not add guest ${err}` })
+    }
   }
 )
 

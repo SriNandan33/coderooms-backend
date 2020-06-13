@@ -12,6 +12,12 @@ const roomSchema = new mongoose.Schema(
       required: true,
       ref: 'User',
     },
+    guests: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
     code: {
       type: String,
     },
