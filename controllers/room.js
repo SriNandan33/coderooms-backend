@@ -16,12 +16,15 @@ roomRouter.get('/', validateJWT, async (request, response) => {
 
 roomRouter.get('/:roomId', validateJWT, async (request, response) => {
   const { roomId } = request.params
-  const room = await Room.findById(roomId)
-  if (!room) response.status(404).send({ error: 'Not Found' })
-  // TODO: follow DRY, owner check logic is being repeated in PUT endpoint below
-  if (room.owner._id.toString() !== request.user._id.toString()) {
-    // only owner can view the room
-    response.status(401).send({ error: 'Permission denied' })
+  // only owner, guests can view the room
+  const room = await Room.findOne({
+    $and: [
+      { _id: roomId },
+      { $or: [{ owner: request.user._id }, { guests: request.user._id }] },
+    ],
+  })
+  if (!room) {
+    response.status(404).send({ error: 'Room does not exist' })
   }
   response.send({ room })
 })
