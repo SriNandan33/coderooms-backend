@@ -8,7 +8,9 @@ const { roomValidator } = require('../validators/room')
 const { addGuestValidator } = require('../validators/guests')
 
 roomRouter.get('/', validateJWT, async (request, response) => {
-  const rooms = await Room.find({ owner: request.user._id }).sort({
+  const rooms = await Room.find({
+    $or: [{ owner: request.user._id }, { guests: request.user._id }],
+  }).sort({
     createdAt: -1,
   })
   response.send({ rooms })
