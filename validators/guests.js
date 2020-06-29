@@ -1,5 +1,3 @@
-const { request } = require('express')
-
 const { Joi } = require('express-validation')
 
 const addGuestValidator = {
