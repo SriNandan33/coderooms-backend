@@ -15,6 +15,9 @@ sockets.on('connection', (socket) => {
   socket.on('code-edited', (data) => {
     socket.to(data.roomId).emit('code-edited', data)
   })
+  socket.on('drawing', (data) => {
+    socket.to(data.roomId).emit('drawing', data)
+  })
 })
 
 server.listen(config.PORT, () => {
