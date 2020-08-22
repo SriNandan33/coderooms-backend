@@ -11,6 +11,7 @@ const sockets = socketIO(server).of('/sockets/room')
 sockets.on('connection', (socket) => {
   socket.on('join-room', (data) => {
     socket.join(data.roomId)
+    socket.to(data.roomId).emit('user-joined', data)
   })
   socket.on('code-edited', (data) => {
     socket.to(data.roomId).emit('code-edited', data)
