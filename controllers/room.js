@@ -54,8 +54,10 @@ roomRouter.put(
     const payload = request.body
     const room = await Room.findById(roomId)
     // TODO: follow DRY, owner check logic is being repeated in GET endpoint above
-    if (room.owner._id.toString() !== request.user._id.toString()) {
-      // only owner can update the room
+    const isOwner = room.owner._id.toString() === request.user._id.toString()
+    const isGuest = room.guests.includes(request.user._id.toString())
+    if (!isOwner && !isGuest) {
+      // only owner or guest can update the room
       response.status(401).send({ error: 'Permission denied' })
     }
     const updatedRoom = await Room.findByIdAndUpdate(roomId, payload, {
