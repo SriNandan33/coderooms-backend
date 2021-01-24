@@ -7,7 +7,7 @@ const roomValidator = {
     id: Joi.string().pattern(new RegExp('^[0-9a-fA-F]{24}$')),
     name: Joi.string(),
     owner: Joi.string().pattern(new RegExp('^[0-9a-fA-F]{24}$')),
-    code: Joi.string(),
+    code: Joi.string().allow(''),
     guests: Joi.array(),
     language: Joi.string().valid('python', 'javascript'),
     private: Joi.bool(),
