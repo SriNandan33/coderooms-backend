@@ -9,6 +9,7 @@ const {
 } = require('../validators/auth')
 
 const { sendEmail } = require('../utils/mail')
+const { generateToken } = require('../utils/auth')
 
 const authRouter = require('express').Router()
 
@@ -89,7 +90,7 @@ authRouter.post(
 )
 
 authRouter.post(
-  '/reset',
+  '/forgot_password',
   validate(ResetValidator, { keyByField: true }),
   async (request, response) => {
     const email = request.body.email
@@ -99,11 +100,13 @@ authRouter.post(
         error: 'No account found with the given email address.',
       })
     }
+    const token = generateToken(user)
+    const url = `${process.env.CLIENT_BASE_URI}/reset/${token}`
     try {
       await sendEmail(
         email,
-        'Reset Password Test',
-        'Please reset your password'
+        'Coderooms: Reset Your Password',
+        `Please reset your password by clicking ${url}`
       )
     } catch (err) {
       console.log(err)
