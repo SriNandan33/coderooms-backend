@@ -102,7 +102,7 @@ authRouter.post(
       })
     }
     const token = generateToken(user)
-    const url = `${process.env.CLIENT_BASE_URI}/reset/${token}`
+    const url = `${process.env.CLIENT_BASE_URI}/reset_password/${token}`
     try {
       await sendEmail(
         email,
