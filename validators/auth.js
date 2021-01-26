@@ -22,14 +22,24 @@ const registerValidator = {
   }),
 }
 
-const ResetValidator = {
+const ForgotPasswordValidator = {
   body: Joi.object({
     email: Joi.string().email().required(),
   }),
 }
 
+const ResetPasswordValidator = {
+  body: Joi.object({
+    password: Joi.string()
+      .regex(/[a-zA-Z0-9]{3,30}/)
+      .required(),
+    confirmPassword: Joi.ref('password'),
+  }).with('password', 'confirmPassword'),
+}
+
 module.exports = {
   loginValidator,
   registerValidator,
-  ResetValidator,
+  ForgotPasswordValidator,
+  ResetPasswordValidator,
 }

@@ -5,11 +5,12 @@ const { validate } = require('express-validation')
 const {
   loginValidator,
   registerValidator,
-  ResetValidator,
+  ResetPasswordValidator,
+  ForgotPasswordValidator,
 } = require('../validators/auth')
 
 const { sendEmail } = require('../utils/mail')
-const { generateToken } = require('../utils/auth')
+const { generateToken, decodeToken } = require('../utils/auth')
 
 const authRouter = require('express').Router()
 
@@ -91,7 +92,7 @@ authRouter.post(
 
 authRouter.post(
   '/forgot_password',
-  validate(ResetValidator, { keyByField: true }),
+  validate(ForgotPasswordValidator, { keyByField: true }),
   async (request, response) => {
     const email = request.body.email
     const user = await User.findOne({ email: email })
@@ -115,6 +116,27 @@ authRouter.post(
       })
     }
     return response.status(204).end()
+  }
+)
+
+authRouter.post(
+  '/reset_password/:token',
+  validate(ResetPasswordValidator, { keyByField: true }),
+  async (request, response) => {
+    const password = request.body.password
+    const token = request.params.token
+    const saltRounds = 10 // TODO: need to move it to config
+    try {
+      let passwordHash = await bcrypt.hash(password, saltRounds)
+      const decoded = decodeToken(token)
+      await User.updateOne(
+        { email: decoded.email },
+        { $set: { password: passwordHash } }
+      )
+      response.status(204).end()
+    } catch (err) {
+      response.status(400).send(err)
+    }
   }
 )
 
