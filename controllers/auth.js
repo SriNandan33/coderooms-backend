@@ -11,6 +11,7 @@ const {
 
 const { sendEmail } = require('../utils/mail')
 const { generateToken, decodeToken } = require('../utils/auth')
+const { validateJWT } = require('../utils/middleware')
 
 const authRouter = require('express').Router()
 
@@ -49,6 +50,7 @@ authRouter.post(
       username: savedUser.username,
       email: savedUser.email,
       id: savedUser._id,
+      verified: user.verified,
     }
     const token = jwt.sign(userForToken, process.env.SECRET)
 
@@ -79,6 +81,7 @@ authRouter.post(
       username: user.username,
       email: user.email,
       id: user._id,
+      verified: user.verified,
     }
 
     const token = jwt.sign(userForToken, process.env.SECRET)
@@ -89,6 +92,41 @@ authRouter.post(
     })
   }
 )
+
+authRouter.post(
+  '/resend_verification_token',
+  validateJWT,
+  async (request, response) => {
+    const email = request.user.email
+    const token = generateToken(request.user)
+    const url = `${process.env.CLIENT_BASE_URI}/verify/${token}`
+    try {
+      await sendEmail(
+        email,
+        'Coderooms: Verify your account',
+        `Please verifiy your account by clicking the following link ${url}`
+      )
+      response.status(204).end()
+    } catch (err) {
+      response.status(500).send(err)
+    }
+  }
+)
+
+authRouter.post('/verify/:token', async (request, response) => {
+  const token = request.params.token
+  try {
+    const decoded = decodeToken(token)
+    const updatedUser = await User.findOneAndUpdate(
+      { email: decoded.email },
+      { verified: true },
+      { new: true }
+    )
+    return response.status(200).send({ user: { ...updatedUser._doc, token } })
+  } catch (err) {
+    response.status(500).send(err)
+  }
+})
 
 authRouter.post(
   '/forgot_password',
@@ -110,7 +148,6 @@ authRouter.post(
         `Please reset your password by clicking ${url}`
       )
     } catch (err) {
-      console.log(err)
       return response.status(500).send({
         error: 'Error while reseting password',
       })
