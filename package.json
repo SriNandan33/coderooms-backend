@@ -21,7 +21,7 @@
     "express-validation": "^3.0.2",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.11",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.5.0"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
